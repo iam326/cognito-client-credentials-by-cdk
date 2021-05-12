@@ -117,5 +117,10 @@ export class CognitoClientCredentialsByCdkStack extends cdk.Stack {
     helloResource.addMethod('OPTIONS', corsIntegration, methodOptionsWithCors);
 
     // admin のみのパス、メソッドを作る
+
+    new cdk.CfnOutput(this, 'CognitoUserPoolId', {
+      value: userPool.userPoolId,
+      exportName: `CognitoUserPoolId`,
+    });
   }
 }
