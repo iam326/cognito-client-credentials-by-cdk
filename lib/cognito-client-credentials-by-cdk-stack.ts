@@ -30,18 +30,14 @@ export class CognitoClientCredentialsByCdkStack extends cdk.Stack {
       },
     });
 
-    const getHelloWorldFunction = new lambda.Function(
-      this,
-      'GetHelloWorldFunction',
-      {
-        code: lambda.AssetCode.fromAsset('src/hello-world'),
-        functionName: `${projectName}-hello-world`,
-        handler: 'index.handler',
-        runtime: lambda.Runtime.NODEJS_14_X,
-        timeout: cdk.Duration.seconds(10),
-        memorySize: 128,
-      }
-    );
+    const helloWorldFunction = new lambda.Function(this, 'helloWorldFunction', {
+      code: lambda.AssetCode.fromAsset('src/hello-world'),
+      functionName: `${projectName}-hello-world`,
+      handler: 'index.handler',
+      runtime: lambda.Runtime.NODEJS_14_X,
+      timeout: cdk.Duration.seconds(10),
+      memorySize: 128,
+    });
 
     const restApi = new apigateway.RestApi(this, 'RestApi', {
       restApiName: `${projectName}-api`,
@@ -67,7 +63,6 @@ export class CognitoClientCredentialsByCdkStack extends cdk.Stack {
       authorizer: {
         authorizerId: authorizer.ref,
       },
-      authorizationScopes: ['users/read', 'users/*'],
     };
 
     const corsIntegration = new apigateway.MockIntegration({
@@ -108,15 +103,24 @@ export class CognitoClientCredentialsByCdkStack extends cdk.Stack {
       ],
     };
 
-    const helloResource = restApi.root.addResource('hello');
-    helloResource.addMethod(
+    const usersResource = restApi.root.addResource('users');
+    usersResource.addMethod(
       'GET',
-      new apigateway.LambdaIntegration(getHelloWorldFunction),
-      methodOptionsWithAuth
+      new apigateway.LambdaIntegration(helloWorldFunction),
+      {
+        ...methodOptionsWithAuth,
+        authorizationScopes: ['users/read', 'users/*'],
+      }
     );
-    helloResource.addMethod('OPTIONS', corsIntegration, methodOptionsWithCors);
-
-    // admin のみのパス、メソッドを作る
+    usersResource.addMethod(
+      'POST',
+      new apigateway.LambdaIntegration(helloWorldFunction),
+      {
+        ...methodOptionsWithAuth,
+        authorizationScopes: ['users/*'],
+      }
+    );
+    usersResource.addMethod('OPTIONS', corsIntegration, methodOptionsWithCors);
 
     new cdk.CfnOutput(this, 'CognitoUserPoolId', {
       value: userPool.userPoolId,
