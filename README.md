@@ -1,14 +1,32 @@
-# Welcome to your CDK TypeScript project!
+# cognito-client-credentials-by-cdk
 
-This is a blank project for TypeScript development with CDK.
+## Environment
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+```
+$ cdk --version
+1.102.0 (build a75d52f)
 
-## Useful commands
+$ yarn --version
+1.22.10
 
- * `npm run build`   compile typescript to js
- * `npm run watch`   watch for changes and compile
- * `npm run test`    perform the jest unit tests
- * `cdk deploy`      deploy this stack to your default AWS account/region
- * `cdk diff`        compare deployed stack with current state
- * `cdk synth`       emits the synthesized CloudFormation template
+$ node --version
+v14.7.0
+
+$ jq --version
+jq-1.6
+```
+
+## Setup
+
+```
+$ cd ./setup
+$ ./create-app-client.sh
+```
+
+## Deploy
+
+```
+$ cdk bootstrap
+$ yarn build
+$ yarn deploy
+```
