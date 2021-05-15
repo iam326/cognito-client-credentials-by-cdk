@@ -44,6 +44,31 @@ export class CognitoClientCredentialsByCdkStack extends cdk.Stack {
       deployOptions: {
         stageName: 'v1',
       },
+      defaultCorsPreflightOptions: {
+        allowOrigins: apigateway.Cors.ALL_ORIGINS,
+        allowMethods: ['POST', 'OPTIONS', 'PUT', 'DELETE'],
+        statusCode: 200,
+      },
+    });
+    restApi.addGatewayResponse('Default4XXGatewayResponse', {
+      type: apigateway.ResponseType.DEFAULT_4XX,
+      responseHeaders: {
+        'gatewayresponse.header.Access-Control-Allow-Headers':
+          "'Content-Type,Authorization'",
+        'gatewayresponse.header.header.Access-Control-Allow-Methods':
+          "'OPTIONS,POST,PUT,GET,DELETE'",
+        'gatewayresponse.header.header.Access-Control-Allow-Origin': "'*'",
+      },
+    });
+    restApi.addGatewayResponse('Default5XXGatewayResponse', {
+      type: apigateway.ResponseType.DEFAULT_5XX,
+      responseHeaders: {
+        'gatewayresponse.header.Access-Control-Allow-Headers':
+          "'Content-Type,Authorization'",
+        'gatewayresponse.header.header.Access-Control-Allow-Methods':
+          "'OPTIONS,POST,PUT,GET,DELETE'",
+        'gatewayresponse.header.header.Access-Control-Allow-Origin': "'*'",
+      },
     });
 
     const authorizer = new apigateway.CfnAuthorizer(
@@ -65,44 +90,6 @@ export class CognitoClientCredentialsByCdkStack extends cdk.Stack {
       },
     };
 
-    const corsIntegration = new apigateway.MockIntegration({
-      integrationResponses: [
-        {
-          statusCode: '200',
-          responseParameters: {
-            'method.response.header.Access-Control-Allow-Headers':
-              "'Content-Type,Authorization'",
-            'method.response.header.Access-Control-Allow-Methods':
-              "'OPTIONS,POST,PUT,GET,DELETE'",
-            'method.response.header.Access-Control-Allow-Origin': "'*'",
-          },
-          responseTemplates: {
-            'application/json': '{}',
-          },
-        },
-      ],
-      passthroughBehavior: apigateway.PassthroughBehavior.WHEN_NO_MATCH,
-      requestTemplates: {
-        'application/json': '{"statusCode": 200}',
-      },
-    });
-
-    const methodOptionsWithCors: apigateway.MethodOptions = {
-      methodResponses: [
-        {
-          statusCode: '200',
-          responseModels: {
-            'application/json': new apigateway.EmptyModel(),
-          },
-          responseParameters: {
-            'method.response.header.Access-Control-Allow-Methods': false,
-            'method.response.header.Access-Control-Allow-Headers': false,
-            'method.response.header.Access-Control-Allow-Origin': false,
-          },
-        },
-      ],
-    };
-
     const usersResource = restApi.root.addResource('users');
     usersResource.addMethod(
       'GET',
@@ -120,7 +107,6 @@ export class CognitoClientCredentialsByCdkStack extends cdk.Stack {
         authorizationScopes: ['users/*'],
       }
     );
-    usersResource.addMethod('OPTIONS', corsIntegration, methodOptionsWithCors);
 
     new cdk.CfnOutput(this, 'CognitoUserPoolId', {
       value: userPool.userPoolId,
