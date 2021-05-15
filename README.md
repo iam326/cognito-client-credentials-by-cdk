@@ -1,5 +1,7 @@
 # cognito-client-credentials-by-cdk
 
+API Gateway と Cognito で Client Credentials Grant による認証フローを試す CDK のサンプル
+
 ## Environment
 
 ```
@@ -16,17 +18,13 @@ $ jq --version
 jq-1.6
 ```
 
-## Setup
-
-```
-$ cd ./setup
-$ ./create-app-client.sh
-```
-
 ## Deploy
 
 ```
 $ cdk bootstrap
 $ yarn build
 $ yarn deploy
+
+$ cd ./setup
+$ ./create-app-client.sh
 ```
